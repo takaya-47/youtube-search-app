@@ -50,14 +50,19 @@ class Youtube extends Model
             $result_items[] = $search_results['items'][$i];
         }
 
-        $next_page_token = $search_results['nextPageToken'];
-        while ($next_page_token) {
-            $search_results = self::search_by_keyword($key_word, $next_page_token);
-            for ($i = 0; $i < count($search_results['items']); $i++) {
-                $result_items[] = $search_results['items'][$i];
-            }
+        if ($search_results['nextPageToken']) {
             $next_page_token = $search_results['nextPageToken'];
+            while ($next_page_token) {
+                $search_results = self::search_by_keyword($key_word, $next_page_token);
+                for ($i = 0; $i < count($search_results['items']); $i++) {
+                    $result_items[] = $search_results['items'][$i];
+                }
+                $next_page_token = $search_results['nextPageToken'];
+            }
         }
+
         return $result_items;
     }
+
+    
 }
