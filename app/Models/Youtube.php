@@ -13,7 +13,7 @@ class Youtube extends Model
     /**
      * 検索ワードをもとに動画を検索します
      * @param  string $key_word
-     * @param  string $next_page_token
+     * @param  string|null $next_page_token
      * @return array
      */
     public static function search_by_keyword(string $key_word, string $next_page_token = null): array
@@ -64,5 +64,5 @@ class Youtube extends Model
         return $result_items;
     }
 
-    
+
 }
