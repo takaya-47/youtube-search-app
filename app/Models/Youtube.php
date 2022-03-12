@@ -21,7 +21,7 @@ class Youtube extends Model
         $response = Http::get('https://www.googleapis.com/youtube/v3/search', [
             'key'             => env('YOUTUBE_API_KEY'),
             'part'            => 'snippet', // 必須パラメータ
-            'maxResults'      => 2, // 結果セットとして返されるアイテムの最大数
+            'maxResults'      => 30, // 結果セットとして返されるアイテムの最大数
             'order'           => 'date', // 並び順（作成日の新しい順）
             'pageToken'       => $next_page_token,
             'publishedAfter'  => '2022-02-01T00:00:00Z', // とりあえず２月中に投稿された動画を取得
