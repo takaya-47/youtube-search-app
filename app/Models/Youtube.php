@@ -76,25 +76,45 @@ class Youtube extends Model
     public static function search_channels(string $key_word): array
     {
         // キーワード検索で取得した各動画のチャンネルIDを取得する
-        $channel_ids = self::recursive_search($key_word);
+        $channel_ids = self::recursive_search($key_word)[0];
         // チャンネルIDを使って、そのチャンネルのチャンネル登録者数を取得する
         $subscriber_count_list = [];
         for ($i = 0; $i < count($channel_ids); $i++) {
             $response = Http::get('https://www.googleapis.com/youtube/v3/channels', [
                 'key'  => env('YOUTUBE_API_KEY'),
                 'part' => 'statistics', // 必須パラメータ
-                'id'   => $channel_ids[$i],
+                'id'   => $channel_ids[$i], // チャンネルID
             ]);
             $response_body = $response->getBody();
             $search_results = json_decode($response_body, true);
-            $subscriber_count_list[] = $search_results['items']['subscriberCount'];
+            $subscriber_count_list[] = $search_results['items'][0]['subscriberCount'];
         }
         // チャンネルごとのチャンネル登録者数を取得しているため、count()すると$channel_idsと同数になる想定
         return $subscriber_count_list;
     }
 
-    public static function search_videos()
+    public static function search_videos(string $key_word)
     {
-
+        // キーワード検索で取得した各動画の動画IDを取得する
+        $video_ids = self::recursive_search($key_word);
+        // 動画IDを使って動画ごとの動画タイトル、投稿日、動画再生回数を取得する
+        $videos_info_list = [
+            'title'       => [],
+            'publishedAt' => [],
+            'viewCount'   => [],
+        ];
+        for ($i = 0; $i < count($video_ids); $i++) {
+            $response = Http::get('https://www.googleapis.com/youtube/v3/videos', [
+                'key'  => env('YOUTUBE_API_KEY'),
+                'part' => 'snippet, statistics', // 必須パラメータ
+                'id'   => $video_ids[$i],
+            ]);
+            $response_body = $response->getBody();
+            $search_results = json_decode($response_body, true);
+            $videos_info_list['title'][] = $search_results['items'][0]['snippet']['title'];
+            $videos_info_list['publishedAt'][] = $search_results['items'][0]['snippet']['publishedAt'];
+            $videos_info_list['viewCount'][] = $search_results['items'][0]['statistics']['viewCount'];
+        }
+        return $videos_info_list;
     }
 }
