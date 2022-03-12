@@ -69,7 +69,7 @@ class Youtube extends Model
     }
 
     /**
-     * チャンネルごとにチャンネル登録者数を取得します
+     * チャンネルごとのチャンネル登録者数を返却します
      * @param  string $keyword
      * @return array
      */
@@ -93,7 +93,12 @@ class Youtube extends Model
         return $subscriber_count_list;
     }
 
-    public static function search_videos(string $key_word)
+    /**
+     * キーワード検索にヒットした動画情報を返却します
+     * @param  string $key_word
+     * @return array
+     */
+    public static function search_videos(string $key_word): array
     {
         // キーワード検索で取得した各動画の動画IDを取得する
         $video_ids = self::recursive_search($key_word);
