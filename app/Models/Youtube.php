@@ -35,19 +35,22 @@ class Youtube extends Model
     }
 
     /**
-     * 検索メソッドを再帰的に実行し、動画のチャンネルIDを返却します
+     * 検索メソッドを再帰的に実行し、動画のチャンネルIDと動画IDを返却します
      * @param  string $key_word
      * @return array
      */
     public static function recursive_search(string $key_word): array
     {
-        // 検索結果を格納する配列
+        // チャンネルIDを格納する配列
         $channel_ids = [];
+        // 動画IDを格納する配列
+        $video_ids = [];
         // 検索を実行
         $search_results = self::search_by_keyword($key_word);
         // 検索結果を格納
         for ($i = 0; $i < count($search_results['items']); $i++) {
             $channel_ids[] = $search_results['items'][$i]['snippet']['channelId'];
+            $video_ids[] = $search_results['items'][$i]['id']['videoId'];
         }
 
         // 検索結果に次ページがあれば次ページの検索結果も取得する
@@ -57,11 +60,12 @@ class Youtube extends Model
                 $search_results = self::search_by_keyword($key_word, $next_page_token);
                 for ($i = 0; $i < count($search_results['items']); $i++) {
                     $channel_ids[] = $search_results['items'][$i]['snippet']['channelId'];
+                    $video_ids[] = $search_results['items'][$i]['id']['videoId'];
                 }
                 $next_page_token = $search_results['nextPageToken'];
             }
         }
-        return $channel_ids;
+        return [$channel_ids, $video_ids];
     }
 
     /**
@@ -87,5 +91,10 @@ class Youtube extends Model
         }
         // チャンネルごとのチャンネル登録者数を取得しているため、count()すると$channel_idsと同数になる想定
         return $subscriber_count_list;
+    }
+
+    public static function search_videos()
+    {
+
     }
 }
