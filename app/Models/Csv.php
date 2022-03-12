@@ -16,7 +16,7 @@ class Csv extends Model
      * @param  string $key_word
      * @return void
      */
-    private static function create_csv_file(string $key_word): void
+    public static function create_csv_file(string $key_word): void
     {
         // チャンネル登録者数のリスト
         $subscriber_count_list = Youtube::search_channels($key_word);
@@ -31,12 +31,16 @@ class Csv extends Model
         // CSVのヘッダー情報
         $csv_header = ['投稿日', 'タイトル', '再生回数', 'チャンネル登録者数', '再生回数/チャンネル登録者数（%）'];
         // csvファイルを書き込みモードで開く
-        $file = fopen('../../public/searchresults.csv', 'w');
+        $file = fopen('/Users/terashimatakaya/myStudy/useApi/laravel/youtube-search-app/public/searchresults.csv', 'w');
         // 先にヘッダー情報を書き込む
         fputcsv($file, $csv_header);
         // その他の情報を１行ずつ書き込む
         $repeat_count = count($subscriber_count_list);
         for ($i = 0; $i < $repeat_count; $i++) {
+            // チャンネル登録者数がゼロだとDivision by zeroのPHPエラーが発生するのでifで防止する
+            if ($subscriber_count_list[$i] == 0) {
+                continue;
+            }
             // 再生回数/チャンネル登録者数が30%未満だったらその動画の情報は書き込みをスキップする
             $percentage = floor(($view_count_list[$i] / $subscriber_count_list[$i]) * 100);
             if ($percentage < self::PERCENTAGE) {
@@ -44,7 +48,7 @@ class Csv extends Model
             }
             // 条件を満たす動画についてはCSVに情報を書き込む
             $row = [];
-            array_push($row, $publishedAt_list[$i], $title_list[$i], $view_count_list[$i], $subscriber_count_list[$i]);
+            array_push($row, $publishedAt_list[$i], $title_list[$i], $view_count_list[$i], $subscriber_count_list[$i], $percentage);
             fputcsv($file, $row);
         }
         // ファイルを閉じる

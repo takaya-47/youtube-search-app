@@ -21,11 +21,11 @@ class Youtube extends Model
         $response = Http::get('https://www.googleapis.com/youtube/v3/search', [
             'key'             => env('YOUTUBE_API_KEY'),
             'part'            => 'snippet', // 必須パラメータ
-            'maxResults'      => 30, // 結果セットとして返されるアイテムの最大数
+            'maxResults'      => 25, // 結果セットとして返されるアイテムの最大数
             'order'           => 'date', // 並び順（作成日の新しい順）
             'pageToken'       => $next_page_token,
-            'publishedAfter'  => '2022-02-01T00:00:00Z', // とりあえず２月中に投稿された動画を取得
-            'publishedBefore' => '2022-02-28T00:00:00Z', // とりあえず２月中に投稿された動画を取得
+            // 'publishedAfter'  => '2022-02-01T00:00:00Z', // とりあえず２月中に投稿された動画を取得
+            // 'publishedBefore' => '2022-02-28T00:00:00Z', // とりあえず２月中に投稿された動画を取得
             'q'               => $key_word,
             'type'            => 'video', // ビデオのみ検索する
         ]);
@@ -87,7 +87,7 @@ class Youtube extends Model
             ]);
             $response_body = $response->getBody();
             $search_results = json_decode($response_body, true);
-            $subscriber_count_list[] = $search_results['items'][0]['subscriberCount'];
+            $subscriber_count_list[] = $search_results['items'][0]['statistics']['subscriberCount'];
         }
         // チャンネルごとのチャンネル登録者数を取得しているため、count()すると$channel_idsと同数になる想定
         return $subscriber_count_list;
@@ -101,7 +101,7 @@ class Youtube extends Model
     public static function search_videos(string $key_word): array
     {
         // キーワード検索で取得した各動画の動画IDを取得する
-        $video_ids = self::recursive_search($key_word);
+        $video_ids = self::recursive_search($key_word)[1];
         // 動画IDを使って動画ごとの動画タイトル、投稿日、動画再生回数を取得する
         $videos_info_list = [
             'title'       => [],
