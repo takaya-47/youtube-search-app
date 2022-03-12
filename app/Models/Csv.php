@@ -16,7 +16,7 @@ class Csv extends Model
      * @param  string $key_word
      * @return void
      */
-    private function create_csv_file(string $key_word): void
+    private static function create_csv_file(string $key_word): void
     {
         // チャンネル登録者数のリスト
         $subscriber_count_list = Youtube::search_channels($key_word);
